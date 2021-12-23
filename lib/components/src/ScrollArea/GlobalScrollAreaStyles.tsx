@@ -1,7 +1,7 @@
 import React from 'react';
 import { Global, Theme, CSSObject, keyframes } from '@storybook/theming';
 
-const hsResizeObserverDummyAnimation = keyframes`0%{z-index:0}to{z-index:-1}`;
+const osResizeObserverDummyAnimation = keyframes`0%{z-index:0}to{z-index:-1}`;
 
 export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) => ({
   'html.os-html, html.os-html>.os-host': {
@@ -61,6 +61,17 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
     height: '200%',
     margin: 10,
   },
+  '#os-dummy-scrollbar-size:before, #os-dummy-scrollbar-size:after, .os-content:before, .os-content:after': {
+    content: "''",
+    display: 'table',
+    width: 0.01,
+    height: 0.01,
+    lineHeight: 0,
+    fontSize: 0,
+    flexGrow: 0,
+    flexShrink: 0,
+    visibility: 'hidden',
+  },
   '#os-dummy-scrollbar-size, .os-viewport': {},
   '.os-viewport-native-scrollbars-invisible#os-dummy-scrollbar-size, .os-viewport-native-scrollbars-invisible.os-viewport': {
     scrollbarWidth: ('none!important' as any) as 'none',
@@ -92,7 +103,7 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
     right: 0,
     width: ('auto!important' as any) as 'auto',
     height: ('auto!important' as any) as 'auto',
-    zIndex: 1,
+    zIndex: 0,
   },
   '.os-host-overflow>.os-padding': {
     overflow: 'hidden',
@@ -126,14 +137,6 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
     height: '100%',
     width: '100%',
     visibility: 'visible',
-  },
-  '.os-content:before, .os-content:after': {
-    content: "''",
-    display: 'table',
-    width: 0,
-    height: 0,
-    lineHeight: 0,
-    fontSize: 0,
   },
   '.os-content>.os-textarea': {
     boxSizing: ('border-box!important' as any) as 'border-box',
@@ -196,7 +199,7 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
   '.os-resize-observer, .os-resize-observer-host': {
     boxSizing: 'inherit',
     display: 'block',
-    opacity: 0,
+    visibility: 'hidden',
     position: 'absolute',
     top: 0,
     left: 0,
@@ -213,10 +216,13 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
     borderStyle: 'solid',
     boxSizing: 'border-box',
   },
-  '.os-resize-observer-host:after': {
-    content: "''",
+  '.os-resize-observer-host.observed': {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
   },
-  '.os-resize-observer-host>.os-resize-observer, .os-resize-observer-host:after': {
+  '.os-resize-observer-host>.os-resize-observer, .os-resize-observer-host.observed>.os-resize-observer': {
     height: '200%',
     width: '200%',
     padding: 'inherit',
@@ -225,8 +231,20 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
     display: 'block',
     boxSizing: 'content-box',
   },
-  '.os-resize-observer.observed, object.os-resize-observer': {
-    boxSizing: ('border-box!important' as any) as 'border-box',
+  '.os-resize-observer-host.observed>.os-resize-observer, .os-resize-observer-host.observed>.os-resize-observer:before': {
+    display: 'flex',
+    position: 'relative',
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: 'auto',
+    boxSizing: 'border-box',
+  },
+  '.os-resize-observer-host.observed>.os-resize-observer:before': {
+    content: "''",
+    boxSizing: 'content-box',
+    padding: 'inherit',
+    border: 'inherit',
+    margin: 0,
   },
   '.os-size-auto-observer': {
     boxSizing: ('inherit!important' as any) as 'inherit',
@@ -272,7 +290,10 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
   },
   '.os-resize-observer': {
     animationDuration: '.001s',
-    animationName: `${hsResizeObserverDummyAnimation}`,
+    animationName: `${osResizeObserverDummyAnimation}`,
+  },
+  'object.os-resize-observer': {
+    boxSizing: ('border-box!important' as any) as 'border-box',
   },
   '.os-host-transition>.os-scrollbar, .os-host-transition>.os-scrollbar-corner': {
     transition: 'opacity .3s,visibility .3s,top .3s,right .3s,bottom .3s,left .3s',
@@ -289,15 +310,9 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
   '.os-scrollbar-corner': {
     bottom: 0,
     right: 0,
-    height: 10,
-    width: 10,
-    backgroundColor: 'transparent',
   },
   '.os-scrollbar': {
     pointerEvents: 'none',
-    padding: 2,
-    boxSizing: 'border-box',
-    background: 0,
   },
   '.os-scrollbar-track': {
     pointerEvents: 'auto',
@@ -325,14 +340,10 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
   '.os-scrollbar-horizontal': {
     bottom: 0,
     left: 0,
-    right: 10,
-    height: 10,
   },
   '.os-scrollbar-vertical': {
     top: 0,
     right: 0,
-    bottom: 10,
-    width: 10,
   },
   '.os-host-rtl>.os-scrollbar-horizontal': {
     right: 0,
@@ -390,36 +401,65 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
   '.os-host-overflow': {
     overflow: ('hidden!important' as any) as 'hidden',
   },
-  '.os-theme-dark.os-host-rtl>.os-scrollbar-horizontal': {
+  '.os-theme-dark>.os-scrollbar-horizontal, .os-theme-light>.os-scrollbar-horizontal': {
+    right: 10,
+    height: 10,
+  },
+  '.os-theme-dark>.os-scrollbar-vertical, .os-theme-light>.os-scrollbar-vertical': {
+    bottom: 10,
+    width: 10,
+  },
+  '.os-theme-dark.os-host-rtl>.os-scrollbar-horizontal, .os-theme-light.os-host-rtl>.os-scrollbar-horizontal': {
     left: 10,
     right: 0,
   },
-  '.os-scrollbar.os-scrollbar-unusable': {
+  '.os-theme-dark>.os-scrollbar-corner, .os-theme-light>.os-scrollbar-corner': {
+    height: 10,
+    width: 10,
+    backgroundColor: 'transparent',
+  },
+  '.os-theme-dark>.os-scrollbar, .os-theme-light>.os-scrollbar': {
+    padding: 2,
+    boxSizing: 'border-box',
     background: 0,
   },
-  '.os-scrollbar>.os-scrollbar-track': {
+  '.os-theme-dark>.os-scrollbar.os-scrollbar-unusable, .os-theme-light>.os-scrollbar.os-scrollbar-unusable': {
     background: 0,
   },
-  '.os-scrollbar-horizontal>.os-scrollbar-track>.os-scrollbar-handle': {
+  '.os-theme-dark>.os-scrollbar>.os-scrollbar-track, .os-theme-light>.os-scrollbar>.os-scrollbar-track': {
+    background: 0,
+  },
+  '.os-theme-dark>.os-scrollbar-horizontal>.os-scrollbar-track>.os-scrollbar-handle, .os-theme-light>.os-scrollbar-horizontal>.os-scrollbar-track>.os-scrollbar-handle': {
     minWidth: 30,
   },
-  '.os-scrollbar-vertical>.os-scrollbar-track>.os-scrollbar-handle': {
+  '.os-theme-dark>.os-scrollbar-vertical>.os-scrollbar-track>.os-scrollbar-handle, .os-theme-light>.os-scrollbar-vertical>.os-scrollbar-track>.os-scrollbar-handle': {
     minHeight: 30,
   },
-  '.os-theme-dark.os-host-transition>.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle': {
+  '.os-theme-dark.os-host-transition>.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle, .os-theme-light.os-host-transition>.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle': {
     transition: 'background-color .3s',
   },
-  '.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle, .os-scrollbar>.os-scrollbar-track': {
+  '.os-theme-dark>.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle, .os-theme-light>.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle, .os-theme-dark>.os-scrollbar>.os-scrollbar-track, .os-theme-light>.os-scrollbar>.os-scrollbar-track': {
     borderRadius: 10,
   },
-  '.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle': {
-    background: theme.color.mediumdark,
-    opacity: 0.5,
+  '.os-theme-dark>.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle': {
+    background: 'rgba(0,0,0,.4)',
   },
-  '.os-scrollbar:hover>.os-scrollbar-track>.os-scrollbar-handle': {
-    opacity: 0.6,
+  '.os-theme-light>.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle': {
+    background: 'rgba(255,255,255,.4)',
   },
-  '.os-scrollbar-horizontal .os-scrollbar-handle:before, .os-scrollbar-vertical .os-scrollbar-handle:before': {
+  '.os-theme-dark>.os-scrollbar:hover>.os-scrollbar-track>.os-scrollbar-handle': {
+    background: 'rgba(0,0,0,.55)',
+  },
+  '.os-theme-light>.os-scrollbar:hover>.os-scrollbar-track>.os-scrollbar-handle': {
+    background: 'rgba(255,255,255,.55)',
+  },
+  '.os-theme-dark>.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle.active': {
+    background: 'rgba(0,0,0,.7)',
+  },
+  '.os-theme-light>.os-scrollbar>.os-scrollbar-track>.os-scrollbar-handle.active': {
+    background: 'rgba(255,255,255,.7)',
+  },
+  '.os-theme-dark>.os-scrollbar-horizontal .os-scrollbar-handle:before, .os-theme-dark>.os-scrollbar-vertical .os-scrollbar-handle:before, .os-theme-light>.os-scrollbar-horizontal .os-scrollbar-handle:before, .os-theme-light>.os-scrollbar-vertical .os-scrollbar-handle:before': {
     content: "''",
     position: 'absolute',
     left: 0,
@@ -428,18 +468,18 @@ export const getScrollAreaStyles: (theme: Theme) => CSSObject = (theme: Theme) =
     bottom: 0,
     display: 'block',
   },
-  '.os-theme-dark.os-host-scrollbar-horizontal-hidden>.os-scrollbar-horizontal .os-scrollbar-handle:before, .os-theme-dark.os-host-scrollbar-vertical-hidden>.os-scrollbar-vertical .os-scrollbar-handle:before': {
+  '.os-theme-dark.os-host-scrollbar-horizontal-hidden>.os-scrollbar-horizontal .os-scrollbar-handle:before, .os-theme-dark.os-host-scrollbar-vertical-hidden>.os-scrollbar-vertical .os-scrollbar-handle:before, .os-theme-light.os-host-scrollbar-horizontal-hidden>.os-scrollbar-horizontal .os-scrollbar-handle:before, .os-theme-light.os-host-scrollbar-vertical-hidden>.os-scrollbar-vertical .os-scrollbar-handle:before': {
     display: 'none',
   },
-  '.os-scrollbar-horizontal .os-scrollbar-handle:before': {
+  '.os-theme-dark>.os-scrollbar-horizontal .os-scrollbar-handle:before, .os-theme-light>.os-scrollbar-horizontal .os-scrollbar-handle:before': {
     top: -6,
     bottom: -2,
   },
-  '.os-scrollbar-vertical .os-scrollbar-handle:before': {
+  '.os-theme-dark>.os-scrollbar-vertical .os-scrollbar-handle:before, .os-theme-light>.os-scrollbar-vertical .os-scrollbar-handle:before': {
     left: -6,
     right: -2,
   },
-  '.os-host-rtl.os-scrollbar-vertical .os-scrollbar-handle:before': {
+  '.os-host-rtl.os-theme-dark>.os-scrollbar-vertical .os-scrollbar-handle:before, .os-host-rtl.os-theme-light>.os-scrollbar-vertical .os-scrollbar-handle:before': {
     right: -6,
     left: -2,
   },
